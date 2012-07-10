@@ -1,4 +1,6 @@
 """
+@Baohua: Add the floodlight controller support. 2012/07/09
+
 Node objects for Mininet.
 
 Nodes provide a simple abstraction for interacting with hosts, switches
@@ -638,8 +640,12 @@ class Controller( Node ):
         cout = '/tmp/' + self.name + '.log'
         if self.cdir is not None:
             self.cmd( 'cd ' + self.cdir )
-        self.cmd( self.command + ' ' + self.cargs % self.port +
-            ' 1>' + cout + ' 2>' + cout + '&' )
+        if self.cargs is not None:
+            self.cmd( self.command + ' ' + self.cargs % self.port +
+                     ' 1>' + cout + ' 2>' + cout + '&' )
+        else:
+            self.cmd( self.command + ' ' +
+                     ' 1>' + cout + ' 2>' + cout + '&' )
         self.execed = False
 
     def stop( self ):
@@ -687,6 +693,22 @@ class NOX( Controller ):
                     ' '.join( noxArgs ),
             cdir=noxCoreDir, **kwargs )
 
+class FloodLight(Controller):
+    """
+    The FloodLight controller.
+    """
+    def __init__( self, name, args=None, **kwargs ):
+        """Init.
+        @param name: name of the controller.
+        @todo: Add default app, in Controller.__init__().
+        """
+        if not args:
+            args = ['defaultApp']
+        floodlightDir = '~/floodlight'
+        Controller.__init__( self, name,
+            command='java -jar %s/target/floodlight.jar' %floodlightDir,
+            cargs=None,
+            cdir=floodlightDir, **kwargs )
 
 class RemoteController( Controller ):
     "Controller running outside of Mininet's control."
